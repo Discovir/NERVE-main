@@ -1,0 +1,488 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify — NERVE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #c92a2a;
+            --red-hover: #b02525;
+            --bg: #f8f9fa;
+            --sidebar-bg: #fff;
+            --sidebar-width: 280px;
+            --border: #ececec;
+            --text-main: #1a1a1a;
+            --text-muted: #868e96;
+            --green: #22c55e;
+            --blue: #3b82f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text-main); }
+
+        /* Sidebar */
+        aside { width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 0; flex-shrink: 0; }
+        .logo-area { padding: 0 30px 40px; }
+        .logo-area h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+        .system-access { padding: 20px 30px; display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .access-icon { width: 40px; height: 40px; background: #f1f3f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .access-info h6 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .access-info p { font-size: 11px; color: var(--text-muted); }
+        .nav-group { flex-grow: 1; padding: 0 15px; }
+        .nav-item { display: flex; align-items: center; gap: 15px; padding: 12px 20px; text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 700; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; border-right: 3px solid transparent; }
+        .nav-item.active { background: #fffcfc; color: var(--red); border-right: 3px solid var(--red); }
+        .nav-item svg { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+        .nav-item.active svg { opacity: 1; stroke: var(--red); }
+        .emergency-btn { margin: 20px 25px; background: var(--red); color: white; padding: 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .emergency-btn:hover { background: var(--red-hover); }
+
+        /* Top Bar */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-bar { height: 75px; background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; flex-shrink: 0; }
+        .top-left-tabs { display: flex; gap: 30px; }
+        .tab-link { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 600; padding: 25px 0; position: relative; }
+        .tab-link.active { color: var(--red); }
+        .tab-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--red); }
+        .top-right { display: flex; align-items: center; gap: 20px; }
+        .status-pill { background: #f1f3f5; border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 6px; height: 6px; background: #adb5bd; border-radius: 50%; transition: background 0.3s; }
+        .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+        .content { padding: 40px 60px; }
+        .verify-grid { display: grid; grid-template-columns: 1fr 340px; gap: 30px; }
+
+        /* Label */
+        .label { font-size: 11px; font-weight: 800; color: var(--red); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+        .title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .desc { font-size: 13px; color: var(--text-muted); max-width: 650px; line-height: 1.6; margin-bottom: 30px; }
+
+        /* Main verify card */
+        .verify-main { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 40px 50px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; min-height: 580px; }
+        .session-badge { position: absolute; top: 25px; right: 25px; text-align: right; }
+        .session-badge h6 { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .session-badge p { font-size: 11px; font-family: 'JetBrains Mono', monospace; background: #f1f3f5; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--border); }
+
+        /* Subject input area */
+        .subject-input-area { width: 100%; max-width: 380px; margin-bottom: 30px; }
+        .subject-input-area label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; text-align: left; }
+        .subject-row { display: flex; gap: 10px; }
+        .subject-row input { flex-grow: 1; background: #f8f9fa; border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; }
+        .subject-row input:focus { outline: none; border-color: var(--red); background: #fff; }
+        .btn-lookup { padding: 12px 18px; background: var(--text-main); color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .btn-lookup:hover { background: #343a40; }
+
+        /* Scan ring */
+        .scan-ring-wrap { position: relative; width: 320px; height: 320px; margin: 30px 0; display: flex; align-items: center; justify-content: center; }
+        .scan-ring { width: 320px; height: 320px; border: 12px solid rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; background: #050506; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); z-index: 2; }
+        .scan-ring.scanning { border-top-color: var(--red); border-right-color: var(--red); animation: ring-spin 2s linear infinite; }
+        .scan-ring.matched { border-color: var(--green) !important; animation: none; box-shadow: 0 0 40px rgba(34, 197, 94, 0.2); }
+        .scan-ring.failed { border-color: var(--red) !important; animation: none; }
+        @keyframes ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .viz-aura {
+            position: absolute;
+            width: 450px; height: 450px;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: blur(60px);
+        }
+        .viz-aura.scanning { opacity: 0.3; background: var(--red); transform: scale(1.1); }
+        .viz-aura.matched { opacity: 0.2; background: var(--green); transform: scale(1); }
+
+        .ring-inner { width: 240px; height: 240px; border: 2px dashed rgba(255,255,255,0.08); border-radius: 50%; position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .ring-icon { width: 100px; height: 100px; color: var(--red); transition: color 0.3s; opacity: 0.4; }
+        .ring-icon.matched { color: var(--green); opacity: 1; }
+        .status-pulse { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid var(--red); opacity: 0; }
+        .scan-ring.scanning .status-pulse { animation: scan-pulse-kf 1.5s infinite; }
+        @keyframes scan-pulse-kf { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.4); opacity: 0; } }
+
+        /* Confidence meter */
+        .confidence-bar-wrap { width: 100%; max-width: 380px; margin: 15px 0; }
+        .confidence-bar-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+        .conf-bar { height: 8px; background: #f1f3f5; border-radius: 4px; overflow: hidden; }
+        .conf-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.8s ease; }
+        .conf-fill.high { background: var(--green); }
+        .conf-fill.mid { background: #f59e0b; }
+        .conf-fill.low { background: var(--red); }
+
+        /* Result banner */
+        .result-banner { width: 100%; max-width: 380px; padding: 18px 22px; border-radius: 12px; display: none; margin: 15px 0; text-align: left; }
+        .result-banner.matched { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .result-banner.failed { background: #fff5f5; border: 1px solid #fecaca; }
+        .result-banner h4 { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+        .result-banner p { font-size: 12px; color: var(--text-muted); }
+
+        /* Footer control area */
+        .verify-footer { margin-top: auto; width: 100%; max-width: 500px; background: #f8f9fa; border: 1px solid var(--border); border-radius: 12px; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        .footer-feedback { text-align: left; flex-grow: 1; }
+        .footer-feedback h6 { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        .footer-feedback p { font-size: 12px; font-weight: 500; }
+
+        .btn-verify { background: var(--red); color: #fff; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.2s; white-space: nowrap; }
+        .btn-verify:hover:not(:disabled) { background: var(--red-hover); box-shadow: 0 4px 14px rgba(201,42,42,0.3); }
+        .btn-verify:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-connect-hw { background: #fff; border: 1px solid var(--border); padding: 12px 18px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-bottom: 20px; width: 100%; max-width: 380px; }
+        .btn-connect-hw:hover { background: #f8f9fa; }
+
+        /* Live waveform (verify) */
+        .waveform-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .waveform-card h5 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+        canvas#verify-scope { width: 100%; height: 80px; display: block; }
+
+        /* Sidebar cards */
+        .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+        .sidebar-card h6 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; justify-content: space-between; }
+        .lat-row { display: flex; gap: 15px; margin-top: 10px; }
+        .lat-box { flex: 1; background: #f8f9fa; border: 1px solid var(--border); padding: 14px; border-radius: 8px; }
+        .lat-box p { font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        .lat-box h3 { font-size: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+        .v-bar { height: 5px; background: #f1f3f5; border-radius: 3px; overflow: hidden; }
+        .v-bar-fill { height: 100%; background: var(--red); width: 0%; transition: width 0.3s; }
+
+        .profile-row { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
+        .profile-avatar { width: 52px; height: 52px; background: #343a40; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 800; }
+        .profile-details h4 { font-size: 15px; font-weight: 700; }
+        .profile-details p { font-size: 12px; color: var(--text-muted); }
+        .profile-meta { border-top: 1px solid var(--border); padding-top: 15px; }
+        .pm-row { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+        .pm-row strong { color: var(--text-main); }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; padding: 14px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #fff; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.35s; pointer-events: none; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: #22c55e; }
+        .toast.error { background: var(--red); }
+        .toast.info { background: var(--blue); }
+
+        .history-list { max-height: 100px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        .badge.pass { background: #f0fdf4; color: var(--green); }
+        .badge.fail { background: #fff5f5; color: var(--red); }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="logo-area"><h1>NERVE</h1></div>
+    <div class="system-access">
+        <div class="access-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0112 3v0c4.783 0 8.832 3.357 9.8 7.824M12 11a10.003 10.003 0 00-9.8 7.824M12 11V3"></path></svg></div>
+        <div class="access-info"><h6>SYSTEM ACCESS</h6><p>Level 4 Clearance</p></div>
+    </div>
+    <div class="nav-group">
+        <a href="/dashboard" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>DASHBOARD</a>
+        <a href="/enroll" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>ENROLL</a>
+        <a href="/verify" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>BIOMETRIC SCAN</a>
+        <a href="/dashboard" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>HISTORY</a>
+    </div>
+    <button class="emergency-btn">EMERGENCY LOCK</button>
+</aside>
+
+<div class="main-wrapper">
+    <nav class="top-bar">
+        <div class="top-left-tabs">
+            <a href="/dashboard" class="tab-link">Monitor</a>
+            <a href="/enroll" class="tab-link">Enroll</a>
+            <a href="/verify" class="tab-link active">Verify</a>
+        </div>
+        <div class="top-right">
+            <div class="status-pill">
+                <span class="status-dot" id="ws-dot"></span>
+                <span id="ws-status">OFFLINE</span>
+            </div>
+            <div style="width:32px; height:32px; background:#343a40; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:800">ET</div>
+        </div>
+    </nav>
+
+    <section class="content">
+        <div class="label">IDENTITY VERIFICATION</div>
+        <h1 class="title">EMG Authentication Protocol</h1>
+        <p class="desc">Enter a Subject ID, perform a quick EMG gesture, then press <strong>Verify Now</strong>.</p>
+
+        <div class="verify-grid">
+            <div class="verify-main">
+                <div class="session-badge">
+                    <h6>SESSION TOKEN</h6>
+                    <p id="session-token">——</p>
+                </div>
+
+                <div class="subject-input-area">
+                    <label>Subject ID to Verify</label>
+                    <div class="subject-row">
+                        <input type="text" id="verify-subject-id" placeholder="e.g. SUB_001">
+                        <button class="btn-lookup" onclick="lookupSubject()">LOAD →</button>
+                    </div>
+                </div>
+
+                <button class="btn-connect-hw" id="btn-connect-serial" onclick="startWebSerial()">
+                    LINK SENSOR HARDWARE
+                </button>
+
+                <div class="scan-ring-wrap">
+                    <div class="viz-aura" id="viz-aura"></div>
+                    <div class="scan-ring" id="scan-ring">
+                        <div class="status-pulse"></div>
+                        <div class="ring-inner">
+                            <svg class="ring-icon" id="ring-icon" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h2l1-3 2 6 1-3h2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 id="scan-status-text" style="font-size:32px; font-weight:900; letter-spacing:8px; text-transform:uppercase; margin-bottom:8px; font-family:'Inter', sans-serif;">Awaiting Link</h2>
+                <p id="scan-sub-text" style="font-size:11px; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted); font-weight:700">Link biometric sensor to begin</p>
+
+                <div class="confidence-bar-wrap" id="conf-wrap" style="display:none;">
+                    <div class="confidence-bar-label"><span>MATCH CONFIDENCE</span><span id="conf-pct">0%</span></div>
+                    <div class="conf-bar"><div class="conf-fill" id="conf-fill"></div></div>
+                </div>
+
+                <div class="result-banner" id="result-banner">
+                    <h4 id="result-title">—</h4>
+                    <p id="result-msg">—</p>
+                </div>
+
+                <div class="verify-footer">
+                    <div class="footer-feedback">
+                        <h6>SYSTEM FEEDBACK</h6>
+                        <p id="footer-msg">Hardware link required...</p>
+                    </div>
+                    <button class="btn-verify" id="btn-verify-now" onclick="runVerify()" disabled>
+                        VERIFY NOW
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-stats">
+                <div class="waveform-card">
+                    <h5>LIVE WAVEFORM <span id="v-sps" style="color:var(--text-muted); font-weight:500">0 Hz</span></h5>
+                    <canvas id="verify-scope"></canvas>
+                    <div class="v-bar" style="margin-top:10px;"><div class="v-bar-fill" id="v-peak-bar"></div></div>
+                </div>
+                <div class="sidebar-card">
+                    <h6>SIGNAL PEAK <span id="v-peak">0</span></h6>
+                    <div class="lat-row">
+                        <div class="lat-box"><p>SAMPLES</p><h3 id="v-sample-count">0</h3></div>
+                    </div>
+                </div>
+                <div class="sidebar-card" id="profile-card" style="display:none;">
+                    <div class="profile-row">
+                        <div class="profile-avatar" id="profile-initials">?</div>
+                        <div class="profile-details">
+                            <h4 id="profile-name">—</h4>
+                            <p id="profile-id">—</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-card" id="history-card">
+                    <h6>RECENT LOGS</h6>
+                    <div class="history-list" id="history-list"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STATE = { subjectId: null, liveSamples: [], collecting: false, spsCount: 0, peakArr: [] };
+document.getElementById('session-token').textContent = 'NV-' + Math.floor(Math.random() * 9000 + 1000);
+
+const canvas = document.getElementById('verify-scope');
+const ctx = canvas.getContext('2d');
+const SWEEP = 400;
+let waveBuf = new Float32Array(SWEEP).fill(2048);
+let waveHead = 0;
+let ws = null;
+let serialPort = null;
+let reader = null;
+
+function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+window.onresize = resizeCanvas; resizeCanvas();
+
+function drawWave() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#c92a2a'; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (let i = 0; i < SWEEP; i++) {
+        const x = (i / SWEEP) * canvas.width;
+        const idx = (waveHead + i) % SWEEP;
+        const y = canvas.height - (waveBuf[idx] / 4095) * canvas.height;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke(); requestAnimationFrame(drawWave);
+}
+drawWave();
+
+setInterval(() => { document.getElementById('v-sps').textContent = `${STATE.spsCount} Hz`; STATE.spsCount = 0; }, 1000);
+
+function connectWS() {
+    if (ws && ws.readyState <= 1) return;
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws/emg/`);
+    ws.onopen = () => { document.getElementById('ws-dot').classList.add('active'); document.getElementById('ws-status').innerText = 'WS ACTIVE'; };
+    ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        const vals = msg.channels || (Array.isArray(msg) ? msg : null);
+        if (vals && Array.isArray(vals)) {
+            vals.forEach(val => {
+                waveBuf[waveHead] = val; waveHead = (waveHead + 1) % SWEEP;
+                STATE.spsCount++;
+                if (STATE.collecting) { STATE.liveSamples.push(val); }
+                STATE.peakArr.push(val); if (STATE.peakArr.length > 50) STATE.peakArr.shift();
+            });
+            document.getElementById('v-sample-count').innerText = STATE.liveSamples.length;
+            const peak = Math.max(...STATE.peakArr);
+            document.getElementById('v-peak').innerText = peak.toFixed(0);
+            document.getElementById('v-peak-bar').style.width = (peak/4095*100)+'%';
+        }
+    };
+    ws.onclose = () => { document.getElementById('ws-dot').classList.remove('active'); document.getElementById('ws-status').innerText = 'WS OFFLINE'; setTimeout(connectWS, 2000); };
+}
+
+async function startWebSerial() {
+    if (!("serial" in navigator)) { alert("WebSerial not supported"); return; }
+    try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 115200 });
+        document.getElementById('scan-status-text').innerText = 'Ready to Scan';
+        document.getElementById('footer-msg').innerText = 'Hardware linked. Awaiting command.';
+        document.getElementById('btn-verify-now').disabled = false;
+        const decoder = new TextDecoderStream(); 
+        serialPort.readable.pipeTo(decoder.writable);
+        const inputStream = decoder.readable.pipeThrough(new TransformStream(new LineBreakTransformer()));
+        reader = inputStream.getReader();
+        readLoop();
+    } catch (err) { console.error(err); }
+}
+
+async function readLoop() {
+    let batch = [];
+    while (serialPort && serialPort.readable) {
+        try {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) {
+                const val = parseFloat(value.trim());
+                if (!isNaN(val)) {
+                    waveBuf[waveHead] = val; waveHead = (waveHead + 1) % SWEEP;
+                    STATE.spsCount++;
+                    if (STATE.collecting) { STATE.liveSamples.push(val); document.getElementById('v-sample-count').innerText = STATE.liveSamples.length; }
+                    batch.push(val);
+                    if (batch.length >= 10) {
+                        if (ws && ws.readyState === 1) ws.send(JSON.stringify({ channels: batch }));
+                        batch = [];
+                    }
+                    STATE.peakArr.push(val); if (STATE.peakArr.length > 50) STATE.peakArr.shift();
+                    const peak = Math.max(...STATE.peakArr);
+                    document.getElementById('v-peak').innerText = peak.toFixed(0);
+                    document.getElementById('v-peak-bar').style.width = (peak/4095*100)+'%';
+                }
+            }
+        } catch (err) { break; }
+    }
+}
+
+class LineBreakTransformer {
+    constructor() { this.container = ''; }
+    transform(chunk, controller) {
+        this.container += chunk;
+        const lines = this.container.split('\r\n');
+        this.container = lines.pop();
+        lines.forEach(line => controller.enqueue(line));
+    }
+    flush(controller) { controller.enqueue(this.container); }
+}
+
+async function runVerify() {
+    if (!STATE.subjectId) { alert("Load Subject first"); return; }
+    console.log("DEBUG: Starting verification for subject " + STATE.subjectId);
+    
+    // Ensure liveSamples is array and clear it for new scan
+    if (!STATE.liveSamples) STATE.liveSamples = [];
+    STATE.liveSamples = [];
+
+    STATE.collecting = true;
+    document.getElementById('scan-ring').classList.add('scanning');
+    document.getElementById('scan-status-text').innerText = 'CLENCH NOW!';
+    const pulseElement = document.querySelector('.status-pulse');
+    if (pulseElement) pulseElement.style.display = 'block';
+    
+    setTimeout(async () => {
+        STATE.collecting = false;
+        document.getElementById('scan-ring').classList.remove('scanning');
+        if (pulseElement) pulseElement.style.display = 'none';
+        document.getElementById('scan-status-text').innerText = 'ANALYZING...';
+        
+        // Mock data if no sensor linked (for controller testing)
+        if (STATE.liveSamples.length === 0) {
+            console.log("DEBUG: No samples found, using mock noise for demo.");
+            STATE.liveSamples = Array.from({length: 50}, () => Math.random() * 100);
+        }
+
+        try {
+            console.log("DEBUG: Sending request to /api/verify...");
+            const r = await apiFetch('/api/verify', 'POST', { subject_id: STATE.subjectId, samples: STATE.liveSamples });
+            if (!r.ok) {
+                const err = await r.json();
+                console.error("DEBUG: API Error: ", err);
+                alert("Verification Failed: " + (err.detail || "Server Error"));
+                return;
+            }
+            const res = await r.json();
+            console.log("DEBUG: Received Response: ", res);
+            displayResult(res);
+        } catch (e) {
+            console.error("DEBUG: Network Error: ", e);
+            alert("Network Error during verification.");
+        }
+    }, 2500);
+}
+
+function displayResult(res) {
+    const matched = res.match;
+    const ring = document.getElementById('scan-ring');
+    const aura = document.getElementById('viz-aura');
+    ring.className = 'scan-ring ' + (matched ? 'matched' : 'failed');
+    aura.className = 'viz-aura ' + (matched ? 'matched' : 'failed');
+    document.getElementById('scan-status-text').innerText = matched ? 'AUTHENTICATED' : 'ACCESS DENIED';
+    document.getElementById('scan-status-text').style.color = matched ? 'var(--green)' : 'var(--red)';
+    document.getElementById('result-banner').style.display = 'block';
+    document.getElementById('result-banner').className = 'result-banner ' + (matched ? 'matched' : 'failed');
+    document.getElementById('result-title').innerText = matched ? 'CONFIRMED' : 'REJECTED';
+    document.getElementById('conf-wrap').style.display = 'block';
+    document.getElementById('conf-fill').style.width = res.confidence + '%';
+    document.getElementById('conf-pct').innerText = res.confidence + '%';
+    document.getElementById('footer-msg').innerText = res.message;
+}
+
+async function lookupSubject() {
+    const id = document.getElementById('verify-subject-id').value.trim();
+    const r = await fetch(`/api/subjects/${id}`);
+    if (r.ok) {
+        const d = await r.json(); STATE.subjectId = d.subject_id;
+        document.getElementById('profile-card').style.display = 'block';
+        document.getElementById('profile-name').innerText = d.full_name || d.subject_id;
+        document.getElementById('profile-id').innerText = d.subject_id;
+        document.getElementById('btn-verify-now').disabled = false;
+        document.getElementById('footer-msg').innerText = 'Subject loaded. Ready for scan.';
+        showToast("Subject Loaded", "success");
+    } else { showToast("Subject not found", "error"); }
+}
+
+function showToast(m, t) { const tr = document.getElementById('toast'); tr.innerText = m; tr.className='toast show '+t; setTimeout(()=>tr.classList.remove('show'), 3000); }
+async function apiFetch(u, m, b) {
+    const csrf = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
+    return fetch(u, { method: m, headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify(b) });
+}
+connectWS();
+</script>
+</body>
+</html>

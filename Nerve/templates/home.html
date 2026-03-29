@@ -1,0 +1,613 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERVE — Precision Bio-Authentication</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --red: #c92a2a;
+            --red-hover: #b02525;
+            --bg: #f8f9fa;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --card-bg: #ffffff;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--text-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .btn-red {
+            background: var(--red);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-red:hover {
+            background: var(--red-hover);
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            letter-spacing: -1px;
+        }
+
+        nav {
+            display: flex;
+            gap: 40px;
+            margin-left: 120px;
+            flex-grow: 1;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--text-main);
+        }
+
+        nav a.active {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -28px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--red);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .header-actions a.login-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .header-actions a.login-link:hover {
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 100px 0 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-pill {
+            background: #f3f4f6;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 30px;
+            align-self: flex-start;
+        }
+
+        .hero-pill .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--red);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .hero-title {
+            font-size: 80px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            line-height: 1.05;
+            margin-bottom: 30px;
+            max-width: 900px;
+        }
+
+        .hero-title span {
+            color: var(--red);
+        }
+
+        .hero-desc {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            font-weight: 400;
+            align-self: flex-start;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            align-self: flex-start;
+        }
+
+        .hero-image-container {
+            margin-top: 60px;
+            width: 100%;
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #f8f9fa;
+            aspect-ratio: 21/9;
+        }
+
+        .hero-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+        }
+
+        .live-node-card {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .live-node-card h6 {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .live-node-card .val {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .live-node-card .val span {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .live-node-card .bar {
+            background: #e5e7eb;
+            height: 4px;
+            width: 100%;
+            border-radius: 2px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .live-node-card .bar-fill {
+            background: var(--red);
+            height: 100%;
+            width: 65%;
+        }
+
+        /* Specs Array */
+        .specs-section {
+            background: #f9fafb;
+            padding: 120px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--red);
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 60px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .spec-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .spec-icon {
+            width: 48px;
+            height: 48px;
+            background: #fff0f0;
+            color: var(--red);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 20px;
+        }
+
+        .spec-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .spec-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .spec-footer {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        /* Hardware Section */
+        .hardware-section {
+            padding: 140px 0;
+        }
+
+        .hardware-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hardware-desc {
+            font-size: 16px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
+
+        .feature-text h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .feature-text p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .hardware-image {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .hardware-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* CTA */
+        .cta-section {
+            background: #f9fafb;
+            padding: 120px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .cta-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+        }
+
+        .cta-desc {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            background: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .footer-logo {
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            color: var(--text-muted);
+        }
+
+        .footer-copy {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div class="container">
+            <div class="hero">
+                <div class="hero-pill"><span class="dot"></span> v2.0 EMG SIGNAL READY</div>
+                <h1 class="hero-title">Precision <span>Bio-<br />Authentication</span> with<br />EMG Signals.</h1>
+                <p class="hero-desc">Medical-grade biometric verification utilizing sub-millisecond EMG signal
+                    mapping. Security that moves at the speed of muscle impulse.</p>
+                <div class="hero-buttons">
+                    <a href="/dashboard" class="btn-red">Start System &rarr;</a>
+                    <a href="#" class="btn-outline">Request Demo</a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="specs-section">
+            <div class="container">
+                <div class="section-label">CORE SPECIFICATIONS</div>
+                <h2 class="section-title">Engineered for absolute fidelity.</h2>
+
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <div class="spec-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <h3 class="spec-title">99.8% Auth Fidelity</h3>
+                        <p class="spec-desc">Advanced biometric sensors eliminate false positives using unique EMG
+                            signature recognition patterns.</p>
+                        <div class="spec-footer">STANDARD FOR STAFF</div>
+                    </div>
+
+                    <div class="spec-card">
+                        <div class="spec-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="spec-title">14ms Latency</h3>
+                        <p class="spec-desc">Optimized EMG processing architecture ensures seamless access without
+                            perceivable delay in the user journey.</p>
+                        <div class="spec-footer">REAL-TIME SYNC READY</div>
+                    </div>
+
+                    <div class="spec-card">
+                        <div class="spec-icon">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                            </svg>
+                        </div>
+                        <h3 class="spec-title">AES-256 EMG Encryption</h3>
+                        <p class="spec-desc">End-to-end hardware-level encryption. Your biometric data never leaves the
+                            local secure enclave in a readable state.</p>
+                        <div class="spec-footer">ZERO-TRUST ARCHITECTURE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hardware-section container">
+            <div class="hardware-grid">
+                <div class="hardware-content">
+                    <div class="section-label">CLINICAL PRECISION</div>
+                    <h2 class="section-title" style="margin-bottom: 24px;">Hardware built for hospital-grade security.
+                    </h2>
+                    <p class="hardware-desc">NERVE isn't just software. Our custom silicon handles EMG signal
+                        recognition at the physical layer, ensuring that spoofing is mathematically impossible.</p>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"
+                                viewBox="0 0 24 24">
+                                <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Advanced EMG Scanner</h4>
+                            <p>High-frequency analysis of myoelectric firing patterns.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"
+                                viewBox="0 0 24 24">
+                                <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Temporal Logic Validation</h4>
+                            <p>Dynamic challenge-response protocols that verify consciousness.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <div class="container">
+                <h2 class="cta-title">Secure your infrastructure today.</h2>
+                <p class="cta-desc">Join the world's most secure institutions in adopting EMG-first authentication.
+                </p>
+                <div class="cta-buttons">
+                    <a href="/dashboard" class="btn-red">Get Started</a>
+                    <a href="#"
+                        style="font-weight:600; font-size:14px; display:inline-flex; align-items:center; gap:8px;">View
+                        Documentation <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
+                            </path>
+                        </svg></a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-logo">NERVE EMG Labs</div>
+        <div class="footer-links">
+            <a href="#">PRIVACY</a>
+            <a href="#">TERMS</a>
+            <a href="#">DOCUMENTATION</a>
+        </div>
+        <div class="footer-copy">&copy; 2026 NERVE EMG LABS. ALL RIGHTS RESERVED.</div>
+    </footer>
+
+</body>
+
+</html>
