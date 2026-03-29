@@ -1,0 +1,22 @@
+Best model: Random Forest
+
+Cross-validation results:
+  SVM (RBF)             81.3% ± 2.8%
+  KNN (k=5)             82.9% ± 1.8%
+  Random Forest         84.2% ± 2.7%
+
+Classification report (Random Forest):
+              precision    recall  f1-score   support
+
+     user_01       1.00      1.00      1.00       460
+     user_02       1.00      1.00      1.00       460
+
+    accuracy                           1.00       920
+   macro avg       1.00      1.00      1.00       920
+weighted avg       1.00      1.00      1.00       920
+
+Confusion matrix:
+[[460   0]
+ [  0 460]]
+
+Classes: ['user_01', 'user_02']
