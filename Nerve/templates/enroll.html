@@ -1,0 +1,632 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enroll — NERVE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #c92a2a;
+            --red-hover: #b02525;
+            --bg: #f8f9fa;
+            --sidebar-bg: #fff;
+            --sidebar-width: 280px;
+            --border: #ececec;
+            --text-main: #1a1a1a;
+            --text-muted: #868e96;
+            --green: #22c55e;
+            --purple: #9b59b6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--text-main); }
+
+        /* Sidebar */
+        aside { width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 0; flex-shrink: 0; }
+        .logo-area { padding: 0 30px 40px; }
+        .logo-area h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+        .system-access { padding: 20px 30px; display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .access-icon { width: 40px; height: 40px; background: #f1f3f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .access-info h6 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .access-info p { font-size: 11px; color: var(--text-muted); }
+        .nav-group { flex-grow: 1; padding: 0 15px; }
+        .nav-item { display: flex; align-items: center; gap: 15px; padding: 12px 20px; text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 700; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; border-right: 3px solid transparent;}
+        .nav-item.active { background: #fffcfc; color: var(--red); border-right: 3px solid var(--red); }
+        .nav-item svg { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+        .nav-item.active svg { opacity: 1; stroke: var(--red); }
+        .emergency-btn { margin: 20px 25px; background: var(--red); color: white; padding: 14px; border-radius: 8px; border: none; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .emergency-btn:hover { background: var(--red-hover); box-shadow: 0 4px 12px rgba(201, 42, 42, 0.2); }
+
+        /* Main */
+        .main-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-bar { height: 75px; background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; flex-shrink: 0; }
+        .top-left-tabs { display: flex; gap: 30px; }
+        .tab-link { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 600; padding: 25px 0; position: relative; }
+        .tab-link.active { color: var(--red); }
+        .tab-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--red); }
+        .top-right { display: flex; align-items: center; gap: 20px; }
+        .status-pill { background: #f1f3f5; border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 6px; height: 6px; background: #adb5bd; border-radius: 50%; transition: background 0.3s; }
+        .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+        .content { padding: 40px 60px; }
+        .enroll-grid { display: grid; grid-template-columns: 300px 1fr 300px; gap: 30px; }
+
+        /* Left Config */
+        .config-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .config-card h3 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .field-group { margin-bottom: 16px; }
+        .field-label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+        .field-input, .field-select { width: 100%; background: #f8f9fa; border: 1px solid var(--border); padding: 10px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; transition: border-color 0.2s; }
+        .field-input:focus, .field-select:focus { outline: none; border-color: var(--red); background: #fff; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .port-row { display: flex; gap: 8px; align-items: flex-end; }
+        .port-row .field-input { flex-grow: 1; }
+        .btn-sm { padding: 10px 14px; background: #f1f3f5; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .btn-sm:hover { background: #e9ecef; }
+        .btn-sm.red { background: var(--red); color: #fff; border-color: var(--red); }
+        .btn-sm.red:hover { background: var(--red-hover); }
+
+        /* Progress Steps */
+        .progress-section { padding: 20px 0 0; }
+        .progress-section h4 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px; }
+        .step { display: flex; gap: 14px; margin-bottom: 20px; align-items: flex-start; opacity: 0.4; transition: opacity 0.3s; }
+        .step.done, .step.active { opacity: 1; }
+        .step-marker { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.3s; font-size: 10px; font-weight: 700; }
+        .step.done .step-marker { background: var(--green); border-color: var(--green); color: #fff; }
+        .step.active .step-marker { border-color: var(--red); color: var(--red); }
+        .step-text h4 { font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 0; }
+        .step-text p { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+        /* Central Visualizer */
+        .viz-container { 
+            background: #050506; 
+            border-radius: 24px; 
+            min-height: 480px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: #fff; 
+            position: relative; 
+            overflow: hidden; 
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 100px rgba(0,0,0,1), 0 20px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        /* Tactical HUD Brackets */
+        .hud-bracket {
+            position: absolute;
+            width: 40px; height: 40px;
+            border: 2px solid rgba(255,255,255,0.1);
+            z-index: 5;
+            transition: border-color 0.4s;
+        }
+        .hud-bracket.tl { top: 30px; left: 30px; border-right: 0; border-bottom: 0; }
+        .hud-bracket.tr { top: 30px; right: 30px; border-left: 0; border-bottom: 0; }
+        .hud-bracket.bl { bottom: 30px; left: 30px; border-right: 0; border-top: 0; }
+        .hud-bracket.br { bottom: 30px; right: 30px; border-left: 0; border-top: 0; }
+        
+        .viz-container.clench .hud-bracket { border-color: var(--purple); }
+        .viz-container.ready .hud-bracket { border-color: #4ecca3; }
+        .viz-container.rest .hud-bracket { border-color: #40c4ff; }
+
+        .viz-bg-fx {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%),
+                linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .viz-aura {
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.5);
+            filter: blur(80px);
+        }
+        .viz-aura.clench { opacity: 0.4; transform: scale(1.3); background: var(--purple); }
+        .viz-aura.rest { opacity: 0.2; transform: scale(1); background: #40c4ff; }
+        .viz-aura.ready { opacity: 0.3; transform: scale(1.1); background: #4ecca3; }
+
+        .viz-header { position: absolute; top: 40px; width: 100%; padding: 0 45px; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+        .network-pill { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); font-size: 9px; font-weight: 800; padding: 6px 12px; border-radius: 4px; letter-spacing: 1.5px; }
+
+        .phase-display { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+        
+        .phase-label { 
+            font-size: 22px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 12px; 
+            color: rgba(255,255,255,0.2); 
+            font-family: 'Inter', sans-serif; 
+            transition: 0.4s; 
+            margin-bottom: 5px; 
+            margin-left: 12px; /* Correct visual centering for letter-spacing */
+        }
+        .phase-label.ready { color: #4ecca3; text-shadow: 0 0 30px rgba(78,204,163,0.6); }
+        .phase-label.clench { color: #fff; text-shadow: 0 0 30px rgba(155,89,182,0.8); }
+        .phase-label.rest { color: #40c4ff; text-shadow: 0 0 30px rgba(64,196,255,0.6); }
+        
+        .big-countdown { 
+            font-size: 160px; 
+            font-weight: 900; 
+            line-height: 0.8; 
+            letter-spacing: -10px; 
+            font-family: 'JetBrains Mono', monospace; 
+            color: #fff; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            margin: 15px 0;
+            text-rendering: optimizeLegibility;
+        }
+        .big-countdown.clench { transform: scale(1.15); }
+        .big-countdown.ready { transform: scale(1.05); }
+
+        .rep-counter { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 3px; font-family: 'JetBrains Mono', monospace; margin-top: 15px; background: rgba(255,255,255,0.03); padding: 6px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); }
+
+        /* Timer bar */
+        .timer-bar-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.06); }
+        .timer-bar-fill { height: 100%; background: var(--purple); width: 0%; transition: width 0.05s linear; }
+
+        /* Waveform canvas */
+        .waveform-wrap { position: absolute; bottom: 20px; left: 20px; right: 20px; height: 80px; opacity: 0.6; }
+        canvas#enroll-scope { width: 100%; height: 100%; }
+
+        .instruction-box { position: absolute; bottom: 85px; left: 25px; right: 25px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 16px; display: flex; gap: 12px; align-items: center; }
+        .instr-icon { width: 32px; height: 32px; background: rgba(155,89,182,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--purple); }
+        .instr-text h6 { font-size: 10px; font-weight: 800; margin-bottom: 2px; color: rgba(255,255,255,0.9); }
+        .instr-text p { font-size: 9px; color: rgba(255,255,255,0.5); line-height: 1.3; }
+
+        .graph-card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 25px; height: 260px; position: relative; }
+        .graph-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .graph-card-header h5 { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        canvas#large-enroll-scope { width: 100%; height: 180px; }
+
+        /* Right Stats */
+        .stat-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+        .stat-card h5 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .stat-val-large { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--red); }
+        .stat-unit { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-left: 4px; }
+        .v-bar { height: 5px; background: #f1f3f5; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+        .v-bar-fill { height: 100%; background: var(--red); width: 0%; transition: width 0.15s; }
+
+        .rep-dots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .rep-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: var(--text-muted); transition: all 0.3s; }
+        .rep-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
+        .rep-dot.active { border-color: var(--red); color: var(--red); animation: dot-pulse 1s infinite; }
+        @keyframes dot-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+        .btn-primary { background: var(--red); color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: 700; width: 100%; margin: 15px 0 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-primary:not(:disabled):hover { background: var(--red-hover); box-shadow: 0 4px 14px rgba(201,42,42,0.3); }
+        .btn-secondary { width: 100%; background: #f8f9fa; border: 1px solid var(--border); padding: 13px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-secondary:hover { background: #e9ecef; }
+        .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .toast { position: fixed; bottom: 30px; right: 30px; padding: 14px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #fff; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.35s; pointer-events: none; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: #22c55e; }
+        .toast.error { background: var(--red); }
+        .toast.info { background: #3b82f6; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header .label { font-size: 11px; font-weight: 800; color: var(--red); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+        .page-header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+        .page-header p { font-size: 13px; color: var(--text-muted); max-width: 650px; line-height: 1.6; }
+
+        .signal-mini { display: flex; align-items: flex-end; gap: 3px; height: 60px; }
+        .sig-b { width: 8px; background: var(--red); border-radius: 4px 4px 0 0; opacity: 0.8; transition: height 0.1s; }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="logo-area"><h1>NERVE</h1></div>
+    <div class="system-access">
+        <div class="access-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0112 3v0c4.783 0 8.832 3.357 9.8 7.824M12 11a10.003 10.003 0 00-9.8 7.824M12 11V3"></path></svg></div>
+        <div class="access-info"><h6>SYSTEM ACCESS</h6><p>Level 4 Clearance</p></div>
+    </div>
+    <div class="nav-group">
+        <a href="/dashboard" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>DASHBOARD</a>
+        <a href="/enroll" class="nav-item active"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>ENROLL</a>
+        <a href="/verify" class="nav-item"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>BIOMETRIC SCAN</a>
+    </div>
+    <button class="emergency-btn">EMERGENCY LOCK</button>
+</aside>
+
+<div class="main-wrapper">
+    <nav class="top-bar">
+        <div class="top-left-tabs">
+            <a href="/dashboard" class="tab-link">Monitor</a>
+            <a href="/enroll" class="tab-link active">Enroll</a>
+            <a href="/verify" class="tab-link">Verify</a>
+        </div>
+        <div class="top-right">
+            <div class="status-pill">
+                <span class="status-dot" id="ws-dot"></span>
+                <span id="ws-status">OFFLINE</span>
+            </div>
+            <div style="width:32px; height:32px; background:#343a40; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:800">ET</div>
+        </div>
+    </nav>
+
+    <section class="content">
+        <div class="page-header">
+            <div class="label">PHASE 02 / ENROLLMENT</div>
+            <h1>EMG Data Collection</h1>
+            <p>Register a new subject and collect 10 reps of EMG data. Data is processed locally and streamed to the server via WebSockets.</p>
+        </div>
+
+        <div class="enroll-grid">
+            <div class="left-section">
+                <div class="config-card">
+                    <h3><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>Subject Identity</h3>
+                    <div class="field-group">
+                        <label class="field-label">Subject ID <span style="color:var(--red)">*</span></label>
+                        <input type="text" class="field-input" id="subject-id" placeholder="e.g. SUB_0921" value="SUB_001">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Full Name</label>
+                        <input type="text" class="field-input" id="full-name" placeholder="Optional">
+                    </div>
+                    <button class="btn-sm red" id="btn-register" onclick="registerSubject()" style="width:100%">REGISTER SUBJECT</button>
+                    <div id="reg-status" style="font-size:11px; margin-top:10px; color:var(--text-muted); min-height:16px;"></div>
+                </div>
+
+                <div class="config-card">
+                    <h3><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>Sensor Link</h3>
+                    <button class="btn-primary" id="btn-connect-serial" onclick="startWebSerial()">
+                        CONNECT HARDWARE
+                    </button>
+                    <div class="field-group" style="margin-top:10px">
+                        <label class="field-label">Gesture</label>
+                        <select class="field-select" id="gesture">
+                            <option value="fist_clench">fist_clench</option>
+                            <option value="wrist_flex">wrist_flex</option>
+                            <option value="wrist_extend">wrist_extend</option>
+                            <option value="pinch">pinch</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="config-card" style="padding:20px 25px;">
+                    <h4 style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:20px;">Progress</h4>
+                    <div class="step" id="step-1"><div class="step-marker">1</div><div class="step-text"><h4>Identity</h4><p>Set subject ID</p></div></div>
+                    <div class="step" id="step-2"><div class="step-marker">2</div><div class="step-text"><h4>Hardware</h4><p>Link via WebSerial</p></div></div>
+                    <div class="step" id="step-3"><div class="step-marker">3</div><div class="step-text"><h4>Acquisition</h4><p id="step-3-detail">Collect 10 reps</p></div></div>
+                </div>
+            </div>
+
+            <div class="center-section">
+                <div class="viz-container" id="viz">
+                    <div class="viz-bg-fx"></div>
+                    <div class="viz-aura" id="viz-aura"></div>
+                    
+                    <div class="hud-bracket tl"></div>
+                    <div class="hud-bracket tr"></div>
+                    <div class="hud-bracket bl"></div>
+                    <div class="hud-bracket br"></div>
+
+                    <div class="viz-header">
+                        <div class="network-pill" id="device-label">WAITING FOR SENSOR</div>
+                        <div class="recording-pill" id="rec-pill"><span class="recording-dot"></span>PRODUCING STREAM</div>
+                    </div>
+                    <div class="phase-display">
+                        <div class="phase-label" id="phase-label">IDLE</div>
+                        <div class="big-countdown" id="big-countdown">0.0</div>
+                        <div class="rep-counter" id="rep-counter">READY FOR DATA</div>
+                    </div>
+                    <div class="instruction-box">
+                        <div class="instr-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <div class="instr-text"><h6 id="instr-title">Signal Sync</h6><p id="instr-body">Link sensor hardware to initiate high-fidelity EMG capture.</p></div>
+                    </div>
+                    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timer-bar"></div></div>
+                </div>
+
+                <div class="graph-card">
+                    <div class="graph-card-header">
+                        <h5>LIVE SIGNAL (mV)</h5>
+                        <div style="font-size:10px; font-weight:700; color:var(--text-muted)">SCALE: 0 - 4095 ADC</div>
+                    </div>
+                    <canvas id="large-enroll-scope"></canvas>
+                </div>
+            </div>
+
+            <div class="right-section">
+                <div class="stat-card">
+                    <h5>PEAK <span id="sps-val">0 Hz</span></h5>
+                    <div class="stat-val-large" id="peak-v">0<span class="stat-unit">ADC</span></div>
+                    <div class="v-bar"><div class="v-bar-fill" id="peak-bar"></div></div>
+                </div>
+                <div class="stat-card">
+                    <h5>REP PROGRESS</h5>
+                    <div class="rep-dots" id="rep-dots"></div>
+                </div>
+                <button class="btn-primary" id="btn-start" onclick="startSession()" disabled>START SESSION</button>
+                <button class="btn-secondary" id="btn-stop" onclick="stopSession()" disabled>STOP</button>
+                <button class="btn-secondary" id="btn-export" onclick="exportCSV()" disabled style="margin-top:8px">EXPORT CSV</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STATE = {
+    subjectId: '',
+    sessionId: null,
+    running: false,
+    currentRep: 0,
+    totalReps: 10,
+    sampleBuffer: [],
+    phase: 'idle',
+    spsCount: 0,
+    peakArr: [],
+    stepsDone: new Set(),
+};
+
+const canvas = document.getElementById('large-enroll-scope');
+const ctx = canvas.getContext('2d');
+const SWEEP = 600;
+let waveBuf = new Float32Array(SWEEP).fill(2048);
+let waveHead = 0;
+let ws = null;
+let serialPort = null;
+let reader = null;
+
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+}
+window.onresize = resizeCanvas;
+resizeCanvas();
+
+function drawWave() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const phase = STATE.phase;
+    const lineColor = phase === 'clench' ? '#9b59b6' : phase === 'rest' ? '#40c4ff' : '#c92a2a';
+    ctx.strokeStyle = '#f1f3f5';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height/2);
+    ctx.lineTo(canvas.width, canvas.height/2);
+    ctx.stroke();
+
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let i = 0; i < SWEEP; i++) {
+        const x = (i / SWEEP) * canvas.width;
+        const idx = (waveHead + i) % SWEEP;
+        const y = canvas.height - (waveBuf[idx] / 4095) * canvas.height;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    requestAnimationFrame(drawWave);
+}
+drawWave();
+
+setInterval(() => {
+    document.getElementById('sps-val').innerText = `${STATE.spsCount} Hz`;
+    STATE.spsCount = 0;
+}, 1000);
+
+function connectWS() {
+    if (ws && ws.readyState <= 1) return;
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws/emg/`);
+    ws.onopen = () => {
+        document.getElementById('ws-dot').classList.add('active');
+        document.getElementById('ws-status').innerText = 'WS ACTIVE';
+    };
+    ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        const vals = msg.channels || (Array.isArray(msg) ? msg : null);
+        if (vals && Array.isArray(vals)) {
+            vals.forEach(val => {
+                waveBuf[waveHead] = val;
+                waveHead = (waveHead + 1) % SWEEP;
+                STATE.spsCount++;
+                if (STATE.running && STATE.phase === 'clench') STATE.sampleBuffer.push(val);
+                
+                STATE.peakArr.push(val); 
+                if (STATE.peakArr.length > 50) STATE.peakArr.shift();
+            });
+            const peak = Math.max(...STATE.peakArr);
+            document.getElementById('peak-v').innerHTML = `${peak.toFixed(0)}<span class="stat-unit">ADC</span>`;
+            document.getElementById('peak-bar').style.width = `${(peak/4095*100)}%`;
+        }
+    };
+    ws.onclose = () => {
+        document.getElementById('ws-dot').classList.remove('active');
+        document.getElementById('ws-status').innerText = 'WS OFFLINE';
+        setTimeout(connectWS, 2000);
+    };
+}
+
+async function startWebSerial() {
+    if (!("serial" in navigator)) { alert("WebSerial not supported"); return; }
+    try {
+        serialPort = await navigator.serial.requestPort();
+        await serialPort.open({ baudRate: 115200 });
+        document.getElementById('device-label').innerText = 'HARDWARE LINKED';
+        markStep(2);
+        updateStartBtn();
+        const decoder = new TextDecoderStream();
+        serialPort.readable.pipeTo(decoder.writable);
+        const inputStream = decoder.readable.pipeThrough(new TransformStream(new LineBreakTransformer()));
+        reader = inputStream.getReader();
+        readLoop();
+    } catch (err) { console.error(err); }
+}
+
+async function readLoop() {
+    let batch = [];
+    while (serialPort && serialPort.readable) {
+        try {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value) {
+                const val = parseFloat(value.trim());
+                if (!isNaN(val)) {
+                    waveBuf[waveHead] = val;
+                    waveHead = (waveHead + 1) % SWEEP;
+                    STATE.spsCount++;
+                    if (STATE.running && STATE.phase === 'clench') STATE.sampleBuffer.push(val);
+                    batch.push(val);
+                    if (batch.length >= 10) {
+                        if (ws && ws.readyState === 1) ws.send(JSON.stringify({ channels: batch }));
+                        batch = [];
+                    }
+                    STATE.peakArr.push(val); 
+                    if (STATE.peakArr.length > 50) STATE.peakArr.shift();
+                    const peak = Math.max(...STATE.peakArr);
+                    document.getElementById('peak-v').innerHTML = `${peak.toFixed(0)}<span class="stat-unit">ADC</span>`;
+                    document.getElementById('peak-bar').style.width = `${(peak/4095*100)}%`;
+                }
+            }
+        } catch (err) { break; }
+    }
+}
+
+class LineBreakTransformer {
+    constructor() { this.container = ''; }
+    transform(chunk, controller) {
+        this.container += chunk;
+        const lines = this.container.split('\r\n');
+        this.container = lines.pop();
+        lines.forEach(line => controller.enqueue(line));
+    }
+    flush(controller) { controller.enqueue(this.container); }
+}
+
+async function startSession() {
+    if (!STATE.subjectId) return;
+    const reps = parseInt(document.getElementById('reps-target')?.value || 10);
+    const sec = parseInt(document.getElementById('sec-per-rep')?.value || 3);
+    const gesture = document.getElementById('gesture').value;
+    
+    const r = await apiFetch('/api/session/start', 'POST', {
+        subject_id: STATE.subjectId, session_type: 'enroll', gesture, reps_target: reps, sec_per_rep: sec
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    STATE.sessionId = data.id;
+    STATE.running = true;
+    STATE.totalReps = reps;
+    buildRepDots(reps);
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-stop').disabled = false;
+    runSessionLoop(reps, sec);
+}
+
+function runSessionLoop(total, sec) {
+    let rep = 0;
+    function next() {
+        if (!STATE.running || rep >= total) { finish(); return; }
+        rep++;
+        updateRepDot(rep-1, 'active');
+        setPhase('ready', 'READY', rep, total);
+        setTimeout(() => {
+            if (!STATE.running) return;
+            setPhase('clench', 'CLENCH', rep, total);
+            STATE.sampleBuffer = [];
+            countdown(sec, () => {
+                if (!STATE.running) return;
+                saveRep(rep);
+                markRepDone(rep-1);
+                if (rep < total) {
+                    setPhase('rest', 'REST', rep, total);
+                    setTimeout(next, 1500);
+                } else next();
+            });
+        }, 1500);
+    }
+    next();
+}
+
+function countdown(duration, done) {
+    const start = performance.now();
+    const bar = document.getElementById('timer-bar');
+    const cd = document.getElementById('big-countdown');
+    function tick() {
+        const elapsed = (performance.now()-start)/1000;
+        const remain = Math.max(0, duration-elapsed);
+        bar.style.width = (elapsed/duration*100)+'%';
+        cd.innerText = remain.toFixed(1);
+        if (elapsed < duration && STATE.running) requestAnimationFrame(tick);
+        else done();
+    }
+    tick();
+}
+
+async function saveRep(rep) {
+    if (!STATE.sessionId || STATE.sampleBuffer.length === 0) return;
+    const ts = Date.now();
+    const payload = STATE.sampleBuffer.map((v, i) => ({ timestamp: ts+i, raw_value: v, rep_number: rep, phase: 'clench' }));
+    await apiFetch(`/api/session/${STATE.sessionId}/samples/bulk`, 'POST', payload);
+}
+
+function finish() {
+    STATE.running = false;
+    setPhase('done', 'DONE', STATE.totalReps, STATE.totalReps);
+    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-stop').disabled = true;
+    document.getElementById('btn-export').disabled = false;
+    if (STATE.sessionId) apiFetch(`/api/session/${STATE.sessionId}/stop`, 'POST', {});
+}
+
+function stopSession() { STATE.running = false; finish(); }
+function exportCSV() { if(STATE.sessionId) window.open(`/api/session/${STATE.sessionId}/export`, '_blank'); }
+
+async function registerSubject() {
+    const id = document.getElementById('subject-id').value.trim();
+    if (!id) return;
+    const r = await apiFetch('/api/subjects/create', 'POST', { subject_id: id });
+    STATE.subjectId = id;
+    document.getElementById('reg-status').innerText = '✓ Registered';
+    markStep(1);
+    updateStartBtn();
+}
+
+function markStep(i) { document.getElementById(`step-${i}`).classList.add('done'); STATE.stepsDone.add(i); }
+function updateStartBtn() { document.getElementById('btn-start').disabled = !(STATE.subjectId && serialPort); }
+function buildRepDots(n) {
+    const container = document.getElementById('rep-dots');
+    container.innerHTML = '';
+    for(let i=0; i<n; i++) { const d = document.createElement('div'); d.className='rep-dot'; d.innerText=i+1; container.appendChild(d); }
+}
+function updateRepDot(i, cls) { document.querySelectorAll('.rep-dot')[i].className = 'rep-dot '+cls; }
+function markRepDone(i) { updateRepDot(i, 'done'); }
+function setPhase(p, l, r, t) { 
+    STATE.phase = p; 
+    document.getElementById('phase-label').innerText = l;
+    document.getElementById('phase-label').className = 'phase-label '+p;
+    document.getElementById('viz-aura').className = 'viz-aura '+p;
+    document.getElementById('big-countdown').className = 'big-countdown '+p;
+    document.getElementById('viz').className = 'viz-container '+p; // Trigger hud-bracket colors
+    document.getElementById('rep-counter').innerText = r ? `REPETITION ${r} / ${t}` : 'AWAITING START';
+}
+function showToast(m, t) { const tr = document.getElementById('toast'); tr.innerText = m; tr.className='toast show '+t; setTimeout(()=>tr.classList.remove('show'), 3000); }
+async function apiFetch(u, m, b) {
+    const csrf = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
+    return fetch(u, { method: m, headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf }, body: JSON.stringify(b) });
+}
+
+connectWS();
+</script>
+</body>
+</html>
